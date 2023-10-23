@@ -1,0 +1,44 @@
+version: '3.6'
+
+services:
+  
+  #######################################
+  # PSQL: Kong DB
+  #######################################
+  product:
+    build:
+      context: "."
+      dockerfile: ./containers/product/Dockerfile 
+    volumes:
+      - "./shared:/app/shared"
+      - "./services/product:/app/services/product"
+    # command: ["make", "proto"]
+    # networks:
+    #   - microservices_network
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    depends_on:
+      - product_db
+  
+  #######################################
+  # PSQL: product DB
+  #######################################
+  product_db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_DB: product
+      PGDATA: /data/postgres
+    volumes:
+       - product:/data/postgres
+    ports:
+      - "5433:5432"
+    # networks:
+    #   - microservices_network
+
+# networks:
+#   microservices_network:
+
+volumes:
+  product:

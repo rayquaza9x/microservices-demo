@@ -1,0 +1,44 @@
+version: '3.6'
+
+services:
+  
+  #######################################
+  # PSQL: Kong DB
+  #######################################
+  auth:
+    build:
+      context: "."
+      dockerfile: ./containers/auth/Dockerfile 
+    volumes:
+      - "./shared:/app/shared"
+      - "./services/auth:/app/services/auth"
+    # command: ["make", "proto"]
+    # networks:
+    #   - microservices_network
+    depends_on:
+      - auth_db
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+  
+  #######################################
+  # PSQL: Auth DB
+  #######################################
+  auth_db:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_DB: auth
+      PGDATA: /data/postgres
+    volumes:
+       - auth:/data/postgres
+    ports:
+      - "5432:5432"
+    # networks:
+    #   - microservices_network
+
+# networks:
+#   microservices_network:
+
+volumes:
+  auth:

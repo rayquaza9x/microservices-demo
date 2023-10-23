@@ -1,0 +1,12 @@
+version: '3.6'
+
+services:
+  
+  buf:
+    # image: bufbuild/buf
+    build:
+      context: "."
+      dockerfile: ./containers/buf/Dockerfile 
+    volumes:
+      - "./shared/proto:/app/shared/proto"
+    command: ["make", "proto"]

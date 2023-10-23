@@ -1,0 +1,16 @@
+version: '3.6'
+
+services:
+  
+  api_gateway:
+    build:
+      context: "."
+      dockerfile: ./containers/api_gateway/Dockerfile
+    volumes:
+      - "./shared:/app/shared"
+      - "./services/api_gateway:/app/services/api_gateway"
+    ports:
+      - "${APP_PORT}:${APP_PORT}"
+    # command: ["make", "proto"]
+    env_file:
+      - ./containers/api_gateway/.env.example

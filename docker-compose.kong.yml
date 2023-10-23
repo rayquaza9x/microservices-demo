@@ -1,0 +1,88 @@
+version: '3.6'
+
+services:
+  
+  #######################################
+  # Kong
+  #######################################
+  kong:
+    build:
+      context: "."
+      dockerfile: ./containers/kong/Dockerfile
+    # command: "go run cmd/kong/main.go"
+    # command: "air -c /app/go/base/containers/kong/.air.toml"
+    ports:
+      - 8001:8001
+      - 8444:8444
+    networks:
+      - microservices_network
+    volumes:
+      # - ./:/app/go/base
+      - ./containers/kong/kong-middleman-plugin:/tmp/kong-plugin
+    env_file:
+      - ./containers/kong/.env.local
+    depends_on:
+      - psql
+  
+  #######################################
+  # Kong Migration
+  #######################################
+  kong-migration:
+    image: public.ecr.aws/docker/library/kong:3.0.0
+    command: "kong migrations bootstrap"
+    restart: on-failure
+    networks:
+      - microservices_network
+    env_file:
+      - ./containers/kong/.env.local
+    # environment:
+    #   KONG_PG_HOST: ${KONG_PG_HOST}
+    #   KONG_PG_USER: ${KONG_PG_USER}
+    #   KONG_PG_PASSWORD: ${KONG_PG_PASSWORD}
+    #   KONG_DATABASE: ${KONG_DATABASE}
+    depends_on:
+      - psql
+  
+  #######################################
+  # Konga: Kong GUI
+  #######################################
+  konga:
+    image: public.ecr.aws/q1u0u1r0/everfit-public/konga:latest
+    restart: always
+    networks:
+      - microservices_network
+    environment:
+      # DB_ADAPTER: ${KONGA_DB_ADAPTER}
+      # DB_HOST: ${KONGA_DB_HOST}
+      # DB_USER: ${KONGA_DB_USER}
+      # DB_PASSWORD: ${KONGA_DB_PASSWORD}
+      # DB_DATABASE: ${KONGA_DB_NAME}
+      TOKEN_SECRET: EhFQpkbSZLd384mfG7Vel4bGKn
+      NODE_ENV: development
+    ports:
+      - "1337:1337"
+    depends_on:
+      - kong
+
+  #######################################
+  # PSQL: Kong DB
+  #######################################
+  psql:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-root}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-secret}
+      POSTGRES_DB: kong
+      PGDATA: /data/postgres
+    volumes:
+       - kong:/data/postgres
+    ports:
+      - "5432:5432"
+    networks:
+      - microservices_network
+
+networks:
+  microservices_network:
+
+volumes:
+  kong:

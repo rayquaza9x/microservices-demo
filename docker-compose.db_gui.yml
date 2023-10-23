@@ -1,0 +1,26 @@
+version: '3.6'
+
+services:
+  
+  #######################################
+  # Pgadmin: PSQL GUI
+  #######################################
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@gmail.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-secret}
+      # PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+       - pgadmin:/var/lib/pgadmin
+    ports:
+      - "${PGADMIN_PORT:-5050}:80"
+    networks:
+      - microservices_network
+    restart: unless-stopped
+
+networks:
+  microservices_network:
+
+volumes:
+  pgadmin:

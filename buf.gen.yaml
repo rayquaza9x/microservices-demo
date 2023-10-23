@@ -1,0 +1,12 @@
+version: v1
+managed:
+  enabled: true
+  go_package_prefix:
+    default: github.com/rayquaza1994/microservices-demo/shared/proto
+plugins:
+  - plugin: buf.build/protocolbuffers/go
+    out: shared/proto
+    opt: paths=source_relative
+  - plugin: buf.build/bufbuild/connect-go
+    out: shared/proto
+    opt: paths=source_relative
